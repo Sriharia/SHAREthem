@@ -4,7 +4,8 @@ SHAREthem library facilitates P2P file sharing and transfers between devices usi
 Also an attempt to simulate popular [SHAREit](https://play.google.com/store/apps/details?id=com.lenovo.anyshare.gps&hl=en) App functionality.
  
  Library also supports App (Android) to Web Browser transfers if Receiver has no App installed.
-
+ 
+ Download the DEMO APK [here](https://drive.google.com/file/d/0B3z1j_7mna9ENDVXblowM013aGs/view?usp=sharing)
 
 ### Developed by
 [Srihari Yachamaneni](https://github.com/Sriharia) ([@srihari_y](https://twitter.com/srihari_y))
@@ -43,6 +44,8 @@ startActivity(new Intent(getApplicationContext(), ReceiverActivity.class));
 ```
 
 End with an example of getting some data out of the system or using it for a little demo
+
+### Read more about implementation on my blog [here](https://srihary.com/) 
 
 ## DEMO Built With
 
