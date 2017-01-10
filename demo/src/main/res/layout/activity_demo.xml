@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_demo"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.tml.sharethem.demo.DemoActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        android:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="horizontal">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/share_them_actions_margin"
+            android:background="@drawable/send_button_bg"
+            android:gravity="center"
+            android:onClick="sendFiles"
+            android:text="Send"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/circular_textview_size" />
+
+        <Button
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/receive_button_bg"
+            android:gravity="center"
+            android:onClick="receiveFiles"
+            android:text="Receive"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/circular_textview_size" />
+    </LinearLayout>
+
+</RelativeLayout>

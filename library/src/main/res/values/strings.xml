@@ -1,0 +1,43 @@
+<resources>
+    <string name="app_name">SHAREthem</string>
+    <string name="receiver_title">Receive Files</string>
+    <string name="send_title">Send Files</string>
+
+    <string name="sender_data_on_warning">It is highly recommend to close Mobile DATA, Receivers may be able to use mobile data.</string>
+
+    <string name="p2p_sender_system_settings_permission_prompt">Allow app to read/write System settings. Necessary to create a Wifi Hotspot for Offline File Transfers</string>
+
+    <string name="p2p_label_transfer_files">Transfer Files</string>
+    <string name="p2p_label_receive_files">Receive Files</string>
+    <string name="p2p_connect_to_diff_sender"><u>Click here to connect to a different Sender</u></string>
+    <string name="p2p_receiver_files_header">Files available to download</string>
+    <string name="p2p_receiver_scanning_hint">Scanning for a SHAREthem Hotspot&#8230;</string>
+    <string name="p2p_receiver_connecting_hint">Connecting to %s Hotspot&#8230;</string>
+    <string name="p2p_receiver_error_in_connecting">Failed to connect with %s Hotspot. Retrying again..</string>
+    <string name="p2p_receiver_connected_hint" formatted="false">Connected to %s\nYour Device IP: %s</string>
+    <string name="p2p_receiver_connect_timeout_error">Could not connect to SHAREthem Hotspot. Please go to Wifi settings and chose %s to start video transfer from Sender.</string>
+    <string name="p2p_receiver_close_warning">Do you want to turn-off Receiver mode?</string>
+    <string name="p2p_receiver_gps_permission_warning">Without Location(GPS) permission Spuul app is unable to Receive videos offline from Senders. Are you sure to deny this permission?</string>
+    <string name="p2p_receiver_gps_no_permission_prompt">Please enable Location(GPS) permission to proceed with receiving Spuul videos Offline.\nPress Settings button and goto Permissions section to grant LOCATION PERMISSION(GPS)</string>
+    <string name="p2p_receiver_error_sender_disconnected">Sender Hotspot disconnected. retrying..</string>
+
+    <string name="p2p_sender_hint_wifi_connected" formatted="false">• Open Receiver App in \'Receiver mode\' \n(Or)\n• Open WiFi settings and connect \n%s Hotspot &amp; enter\n%s\non a browser\'s address bar.</string>
+    <string name="p2p_sender_subtitle">Hotspot Initialised!!</string>
+
+    <string name="p2p_sender_service_notification_header">ShareThem Wifi Hotspot Enabled</string>
+    <string name="p2p_sender_service_init_notification_header">Initiating ShareThem Hotspot&#8230;</string>
+    <string name="p2p_sender_hint_connecting">Initializing Wifi Hotspot&#8230;</string>
+    <string name="p2p_sender_close_warning">Do you want to stop sharing files?</string>
+    <string name="p2p_sender_shared_list_label"><u>Shared files: </u></string>
+
+    <string name="p2p_sender_hint_text">Turn ON \'Send Files\' to start File Sharing</string>
+    <string name="p2p_receiver_hint_text">Turn ON \'Receive Files\' to receive files from Sender</string>
+
+    <string name="Action_Ok">OK</string>
+    <string name="Action_cancel">Cancel</string>
+
+    <string name="label_settings">Settings</string>
+    <string name="label_thats_ok">That\'s OK</string>
+    <string name="label_dont_ask">Don\'t ask again</string>
+
+</resources>

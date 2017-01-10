@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:innerRadius="0dp"
+    android:innerRadiusRatio="5"
+    android:shape="ring"
+    android:thicknessRatio="2"
+    android:useLevel="false">
+    <solid android:color="@color/colorPrimary" />
+    <corners android:radius="10dp" />
+    <size
+        android:width="@dimen/circular_view_dimension"
+        android:height="@dimen/circular_view_dimension" />
+</shape>

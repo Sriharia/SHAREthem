@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Spuul</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, user-scalable=yes">
+    <script>
+        function fetchData(a){var b;url=window.location.href.split("/"),document.getElementById("logo").src=url[0]+"//"+url[2]+"/logo",document.getElementById("apk_link").href=url[0]+"//"+url[2]+"/apk",url=url[0]+"//"+url[2]+"/files",b=new XMLHttpRequest,b.onreadystatechange=function(){4==this.readyState&&200==this.status&&a(this)},b.open("GET",url,!0),b.send()}function myFunction(a){var d,b=JSON.parse(a.responseText),c="";for(url=window.location.href.split("/"),url=url[0]+"//"+url[2]+"/file/",d=0;d<b.length;d++)c+='<a href="'+url+d+'">'+b[d].split("/").pop()+"</a><br>";document.getElementById("id01").innerHTML=c}
+    </script>
+</head>
+<body  onload="fetchData(myFunction)">
+
+<div id="demo">
+    <img id="logo" height="100px" width="100px"/>
+    <a id="apk_link"><u>Download SHAREthem APK</u></a>
+    <h1>Files available to Download:</h1>
+
+    <div id="id01"></div>
+</div>
+
+</body>
+</html>

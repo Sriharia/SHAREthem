@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#03a9f4</color>
+    <color name="colorPrimary_pressed">#8003a9f4</color>
+    <color name="colorPrimaryDark">#068cc9</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="colorAccent_pressed">#80FF4081</color>
+
+    <color name="rippleColor">#40FFFFFF</color>
+
+    <color name="alert_color_accent">#03a9f4</color>
+</resources>

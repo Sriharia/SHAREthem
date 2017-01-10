@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="p2p_wifi_info_layout_padding">10dp</dimen>
+    <dimen name="p2p_sender_activity_items_margin">15dp</dimen>
+    <dimen name="p2p_sender_items_count_margin">5dp</dimen>
+</resources>

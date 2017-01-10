@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="circular_view_dimension">100dp</dimen>
+    <dimen name="circular_textview_size">20sp</dimen>
+    <dimen name="share_them_actions_margin">20dp</dimen>
+</resources>

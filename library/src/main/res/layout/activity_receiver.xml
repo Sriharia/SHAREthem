@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_alignParentTop="true"
+        android:background="@color/colorPrimary"
+        android:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark">
+
+        <android.support.v7.widget.SwitchCompat
+            android:id="@+id/p2p_receiver_ap_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/p2p_label_receive_files"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@android:color/white"
+            android:theme="@style/p2p_switch" />
+    </android.support.v7.widget.Toolbar>
+
+    <RelativeLayout
+        android:id="@+id/p2p_receiver_control_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/toolbar"
+        android:paddingLeft="@dimen/p2p_wifi_info_layout_padding"
+        android:paddingRight="@dimen/p2p_wifi_info_layout_padding"
+        android:paddingTop="@dimen/p2p_wifi_info_layout_padding">
+
+        <TextView
+            android:id="@+id/p2p_receiver_wifi_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="@dimen/p2p_sender_activity_items_margin"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:text="@string/p2p_receiver_hint_text" />
+
+        <TextView
+            android:id="@+id/p2p_receiver_wifi_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/p2p_receiver_wifi_info"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/p2p_wifi_info_layout_padding"
+            android:text="@string/p2p_connect_to_diff_sender"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/p2p_sender_files_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/p2p_receiver_wifi_switch"
+            android:layout_marginTop="15dp"
+            android:text="@string/p2p_receiver_files_header"
+            android:visibility="gone" />
+    </RelativeLayout>
+
+    <FrameLayout
+        android:id="@+id/sender_files_list_fragment_holder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/p2p_receiver_control_layout" />
+
+</RelativeLayout>
