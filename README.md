@@ -1,4 +1,5 @@
 # SHAREthem
+![App_Icon](screens/ic_launcher.png?raw=true "app-icon")
 
 SHAREthem library facilitates P2P file sharing and transfers between devices using WiFi Hotspot.  
 Also an attempt to simulate popular [SHAREit](https://play.google.com/store/apps/details?id=com.lenovo.anyshare.gps&hl=en) App functionality.
