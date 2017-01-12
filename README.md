@@ -2,11 +2,14 @@
 ![App_Icon](screens/ic_launcher.png?raw=true "app-icon")
 
 SHAREthem library facilitates P2P file sharing and transfers between devices using WiFi Hotspot.  
-Also an attempt to simulate popular [SHAREit](https://play.google.com/store/apps/details?id=com.lenovo.anyshare.gps&hl=en) App functionality.
+Also an attempt to simulate popular [SHAREit](https://play.google.com/store/apps/details?id=com.lenovo.anyshare.gps&hl=en) App functionality and improvise it by supporting multiple receivers at one go
  
- Library also supports App (Android) to Web Browser transfers if Receiver has no App installed.
+Library also supports App (Android) to Web/Mobile Browser transfers if Receiver has no App installed.
+
  
- Download the DEMO APK [here](https://drive.google.com/file/d/0B3z1j_7mna9ENDVXblowM013aGs/view?usp=sharing)
+ Download the Working version from Play Store
+ 
+![Play Store Link](screens/google-play-badge.png)
 
 ### Developed by
 [Srihari Yachamaneni](https://github.com/Sriharia) ([@srihari_y](https://twitter.com/srihari_y))
