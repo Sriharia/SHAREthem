@@ -8,8 +8,11 @@ Library also supports App (Android) to Web/Mobile Browser transfers if Receiver 
 
  
  Download the Working version from Play Store
- 
-![Play Store Link](screens/google-play-badge.png)
+
+[![PlayStore][playstore-image]][playstore-url]
+[playstore-image]: screens/google-play-badge.png
+[playstore-url]: https://play.google.com/store/apps/details?id=com.tml.sharethem.demo
+
 
 ### Developed by
 [Srihari Yachamaneni](https://github.com/Sriharia) ([@srihari_y](https://twitter.com/srihari_y))
