@@ -212,8 +212,12 @@ public class WifiUtils {
         String[] splits = ssid.split("-");
         if (splits.length != 2)
             return false;
-        String[] names = new String(Base64.decode(splits[1], Base64.DEFAULT)).split("\\|");
-        return names.length == 3 && names[1].equals(SENDER_WIFI_NAMING_SALT);
+        try {
+            String[] names = new String(Base64.decode(splits[1], Base64.DEFAULT)).split("\\|");
+            return names.length == 3 && names[1].equals(SENDER_WIFI_NAMING_SALT);
+        } catch(Exception e){
+            return false;
+        }
     }
 
     public static int getSenderSocketPortFromSSID(String ssid) {
