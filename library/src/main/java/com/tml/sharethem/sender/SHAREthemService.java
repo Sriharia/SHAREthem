@@ -38,7 +38,6 @@ import com.tml.sharethem.utils.HotspotControl;
 import com.tml.sharethem.utils.WifiUtils;
 
 import java.lang.ref.WeakReference;
-import java.net.BindException;
 
 import static com.tml.sharethem.sender.SHAREthemService.ShareIntents.SHARE_CLIENT_IP;
 import static com.tml.sharethem.sender.SHAREthemService.ShareIntents.SHARE_SERVER_UPDATES_INTENT_ACTION;
@@ -48,6 +47,7 @@ import static com.tml.sharethem.sender.SHAREthemService.ShareIntents.SHARE_TRANS
 import static com.tml.sharethem.sender.SHAREthemService.ShareIntents.TYPE;
 import static com.tml.sharethem.sender.SHAREthemService.ShareIntents.Types.AP_DISABLED_ACKNOWLEDGEMENT;
 import static com.tml.sharethem.sender.SHAREthemService.ShareIntents.Types.FILE_TRANSFER_STATUS;
+import static com.tml.sharethem.utils.Utils.isOreoOrAbove;
 
 
 /**
@@ -214,34 +214,44 @@ public class SHAREthemService extends Service {
                 sendTransferStatusBroadcast(ip, 0, "Error in file transfer: " + error, fileName);
             }
         }, filePathsTobeServed, port);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    m_fileServer.start();
-                    Log.d(TAG, "**** Server started success****port: " + m_fileServer.getListeningPort() + ", " + m_fileServer.getHostAddress());
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    m_fileServer.start();
+//
+//                } catch (BindException e) {
+//                    e.printStackTrace();
+//                    Log.e(TAG, "exception in starting file server: " + e.getMessage());
+//                } catch (Exception e) {
+//                    Log.e(TAG, "exception in starting file server: " + e.getMessage());
+//                    e.printStackTrace();
+//                }
+//            }
+//        }).start();
+        try {
+            m_fileServer.start();
+            Log.d(TAG, "**** Server started success****port: " + m_fileServer.getListeningPort() + ", " + m_fileServer.getHostAddress());
+            if (isOreoOrAbove()) {
+                hotspotControl.turnOnOreoHotspot(m_fileServer.getListeningPort());
+            } else {
+            /*
+             * We need create a Open Hotspot with an SSID which can be intercepted by Receiver.
+             * Here is the combination logic followed to create SSID for open Hotspot and same is followed by Receiver while decoding SSID, Sender HostName & port to connect
+             * Reason for doing this is to keep SSID unique, constant(unless port is assigned by system) and interpretable by Receiver
+             * {last 4 digits of android id} + {-} + Base64 of [{sender name} + {|} + SENDER_WIFI_NAMING_SALT + {|} + {port}]
+             */
+                String androidId = Settings.Secure.ANDROID_ID;
+                androidId = androidId.replaceAll("[^A-Za-z0-9]", "");
+                String name = (androidId.length() > 4 ? androidId.substring(androidId.length() - 4) : androidId) + "-" + Base64.encodeToString((TextUtils.isEmpty(sender_name) ? generateP2PSpuulName() : sender_name + "|" + WifiUtils.SENDER_WIFI_NAMING_SALT + "|" + m_fileServer.getListeningPort()).getBytes(), Base64.DEFAULT);
 
-                    /*
-                     * We need create a Open Hotspot with an SSID which can be intercepted by Receiver.
-                     * Here is the combination logic followed to create SSID for open Hotspot and same is followed by Receiver while decoding SSID, Sender HostName & port to connect
-                     * Reason for doing this is to keep SSID unique, constant(unless port is assigned by system) and interpretable by Receiver
-                     * {last 4 digits of android id} + {-} + Base64 of [{sender name} + {|} + SENDER_WIFI_NAMING_SALT + {|} + {port}]
-                     */
-                    String androidId = Settings.Secure.ANDROID_ID;
-                    androidId = androidId.replaceAll("[^A-Za-z0-9]", "");
-                    String name = (androidId.length() > 4 ? androidId.substring(androidId.length() - 4) : androidId) + "-" + Base64.encodeToString((TextUtils.isEmpty(sender_name) ? generateP2PSpuulName() : sender_name + "|" + WifiUtils.SENDER_WIFI_NAMING_SALT + "|" + m_fileServer.getListeningPort()).getBytes(), Base64.DEFAULT);
-
-                    hotspotControl.enableShareThemHotspot(name, m_fileServer.getListeningPort());
-                    hotspotCheckHandler.sendEmptyMessage(AP_START_CHECK);
-                } catch (BindException e) {
-                    e.printStackTrace();
-                    Log.e(TAG, "exception in starting file server: " + e.getMessage());
-                } catch (Exception e) {
-                    Log.e(TAG, "exception in starting file server: " + e.getMessage());
-                    e.printStackTrace();
-                }
+                hotspotControl.turnOnPreOreoHotspot(name, m_fileServer.getListeningPort());
+                hotspotCheckHandler.sendEmptyMessage(AP_START_CHECK);
             }
-        }).start();
+        } catch (Exception e) {
+            Log.e(TAG, "exception in hotspot init: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public static String DEFAULT_SENDER_NAME = "Sender.";

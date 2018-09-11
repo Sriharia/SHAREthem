@@ -65,7 +65,8 @@ import java.util.List;
 import static com.tml.sharethem.receiver.ReceiverActivity.WifiTasksHandler.SCAN_FOR_WIFI_RESULTS;
 import static com.tml.sharethem.receiver.ReceiverActivity.WifiTasksHandler.WAIT_FOR_CONNECT_ACTION_TIMEOUT;
 import static com.tml.sharethem.receiver.ReceiverActivity.WifiTasksHandler.WAIT_FOR_RECONNECT_ACTION_TIMEOUT;
-import static com.tml.sharethem.utils.WifiUtils.connectToOpenHotspot;
+import static com.tml.sharethem.utils.Utils.isOreoOrAbove;
+import static com.tml.sharethem.utils.WifiUtils.connectToOpenWifi;
 
 /**
  * Controls
@@ -266,8 +267,9 @@ public class ReceiverActivity extends AppCompatActivity {
                 &&
                 // if targetSdkVersion >= 23
                 //      Get Wifi Scan results method needs GPS to be ON and COARSE location permission
-                !checkLocationPermission())
+                !checkLocationPermission()) {
             return false;
+        }
         changeReceiverControlCheckedStatus(true);
         registerAndScanForWifiResults();
         registerForNwChanges();
@@ -414,6 +416,10 @@ public class ReceiverActivity extends AppCompatActivity {
     private void connectToWifi(String ssid) {
         WifiInfo info = wifiManager.getConnectionInfo();
         unRegisterForScanResults();
+        if (isOreoOrAbove()) {
+            promptToConnectManually(ssid);
+            return;
+        }
         boolean resetWifiScan;
         if (info.getSSID().equals(ssid)) {
             Log.d(TAG, "Already connected to ShareThem, add sender Files listing fragment");
@@ -421,7 +427,7 @@ public class ReceiverActivity extends AppCompatActivity {
             addSenderFilesListingFragment(WifiUtils.getAccessPointIpAddress(getApplicationContext()), ssid);
         } else {
             m_p2p_connection_status.setText(getString(R.string.p2p_receiver_connecting_hint, ssid));
-            resetWifiScan = !connectToOpenHotspot(wifiManager, ssid, false);
+            resetWifiScan = !connectToOpenWifi(wifiManager, ssid, false);
             Log.e(TAG, "connection attempt to ShareThem wifi is " + (!resetWifiScan ? "success!!!" : "FAILED..!!!"));
         }
         //if wap isnt successful, start wifi scan
@@ -436,6 +442,27 @@ public class ReceiverActivity extends AppCompatActivity {
         }
     }
 
+    private void promptToConnectManually(final String ssid) {
+        showOptionsDialogWithListners(getString(R.string.p2p_receiver_oreo_msg, ssid), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                try {
+                    Intent intent = new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK);
+                    startActivity(intent);
+                } catch (Exception e) {
+                    Toast.makeText(ReceiverActivity.this, "Wifi listings not found on your device!! :(", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(getApplicationContext(), getString(R.string.p2p_receiver_error_in_connecting, ssid), Toast.LENGTH_SHORT).show();
+                m_p2p_connection_status.setText(getString(R.string.p2p_receiver_scanning_hint));
+                startSenderScan();
+            }
+        }, "Settings", "Cancel");
+    }
+
     private class WifiScanner extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -443,7 +470,7 @@ public class ReceiverActivity extends AppCompatActivity {
                 List<ScanResult> mScanResults = ((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE)).getScanResults();
                 boolean foundSTWifi = false;
                 for (ScanResult result : mScanResults)
-                    if (WifiUtils.isShareThemSSID(result.SSID) && WifiUtils.isOpenWifi(result)) {
+                    if (WifiUtils.isShareThemSSID(result.SSID) && (isOreoOrAbove() || WifiUtils.isOpenWifi(result))) {
                         Log.d(TAG, "signal level: " + result.level);
                         connectToWifi(result.SSID);
                         foundSTWifi = true;
@@ -566,7 +593,7 @@ public class ReceiverActivity extends AppCompatActivity {
                     break;
                 case WAIT_FOR_CONNECT_ACTION_TIMEOUT:
                     Log.e(TAG, "cant connect to sender's hotspot by increasing priority, try the dirty way..");
-                    activity.m_areOtherNWsDisabled = WifiUtils.connectToOpenHotspot(activity.wifiManager, (String) msg.obj, true);
+                    activity.m_areOtherNWsDisabled = WifiUtils.connectToOpenWifi(activity.wifiManager, (String) msg.obj, true);
                     Message m = obtainMessage(WAIT_FOR_RECONNECT_ACTION_TIMEOUT);
                     m.obj = msg.obj;
                     sendMessageDelayed(m, 6000);

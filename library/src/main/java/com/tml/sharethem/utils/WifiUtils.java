@@ -25,6 +25,9 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.tml.sharethem.utils.Utils.DEFAULT_PORT_OREO;
+import static com.tml.sharethem.utils.Utils.isOreoOrAbove;
+
 
 /**
  * Created by Sri on 18/12/16.
@@ -48,7 +51,7 @@ public class WifiUtils {
      * @param netSSID       of WiFi Network (hotspot)
      * @param disableOthers
      */
-    public static boolean connectToOpenHotspot(WifiManager mWifiManager, String netSSID, boolean disableOthers) {
+    public static boolean connectToOpenWifi(WifiManager mWifiManager, String netSSID, boolean disableOthers) {
 
         isConnectToHotSpotRunning = true;
         WifiConfiguration wifiConf = new WifiConfiguration();
@@ -58,10 +61,11 @@ public class WifiUtils {
             int res = mWifiManager.addNetwork(wifiConf);
             Log.d(TAG, "added network id: " + res);
             mWifiManager.disconnect();
-            if (disableOthers)
+            if (disableOthers) {
                 enableNetworkAndDisableOthers(mWifiManager, netSSID);
-            else
+            } else {
                 enableShareThemNetwork(mWifiManager, netSSID);
+            }
             isConnectToHotSpotRunning = false;
             return mWifiManager.setWifiEnabled(true);
         }
@@ -80,7 +84,7 @@ public class WifiUtils {
             else
                 wifiManager.disableNetwork(wifiConfig.networkId);
         }
-        Log.d(TAG, "enableShareThemHotspot wifi result: " + state);
+        Log.d(TAG, "turnOnPreOreoHotspot wifi result: " + state);
         wifiManager.reconnect();
         return state;
     }
@@ -207,7 +211,19 @@ public class WifiUtils {
         return isConnectedOnWifi(context, true) && isShareThemSSID(((WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE)).getConnectionInfo().getSSID());
     }
 
+    public static boolean isAndroidAP(String ssid) {
+        Log.d(TAG, "is this ssid mathcing to ST hotspot: " + ssid);
+        String[] splits = ssid.split("-");
+        if (splits.length != 2)
+            return false;
+        String[] names = new String(Base64.decode(splits[1], Base64.DEFAULT)).split("\\|");
+        return names.length == 3 && names[1].equals(SENDER_WIFI_NAMING_SALT);
+    }
+
     public static boolean isShareThemSSID(String ssid) {
+        if (isOreoOrAbove()) {
+            return null != ssid && ssid.contains("AndroidShare");
+        }
         Log.d(TAG, "is this ssid mathcing to ST hotspot: " + ssid);
         String[] splits = ssid.split("-");
         if (splits.length != 2)
@@ -231,6 +247,9 @@ public class WifiUtils {
     }
 
     public static String[] getSenderInfoFromSSID(String ssid) {
+        if (isOreoOrAbove()) {
+            return new String[]{ssid, String.valueOf(DEFAULT_PORT_OREO)};
+        }
         String[] splits = ssid.split("-");
         if (splits.length != 2)
             return null;

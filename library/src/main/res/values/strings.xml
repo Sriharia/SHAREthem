@@ -10,6 +10,7 @@
     <string name="p2p_label_transfer_files">Transfer Files</string>
     <string name="p2p_label_receive_files">Receive Files</string>
     <string name="p2p_connect_to_diff_sender"><u>Click here to connect to a different Sender</u></string>
+    <string name="p2p_receiver_oreo_msg" formatted="false">Found a SENDER with SSID: %s. \nPlease click on Settings to Open Wifi Listings and connect to above SSID along with Password shared by Sender.</string>
     <string name="p2p_receiver_files_header">Files available to download</string>
     <string name="p2p_receiver_scanning_hint">Scanning for a SHAREthem Hotspot&#8230;</string>
     <string name="p2p_receiver_connecting_hint">Connecting to %s Hotspot&#8230;</string>
@@ -21,7 +22,7 @@
     <string name="p2p_receiver_gps_no_permission_prompt">Please enable Location(GPS) permission to proceed with receiving Spuul videos Offline.\nPress Settings button and goto Permissions section to grant LOCATION PERMISSION(GPS)</string>
     <string name="p2p_receiver_error_sender_disconnected">Sender Hotspot disconnected. retrying..</string>
 
-    <string name="p2p_sender_hint_wifi_connected" formatted="false">• Open Receiver App in \'Receiver mode\' \n(Or)\n• Open WiFi settings and connect \n%s Hotspot &amp; enter\n%s\non a browser\'s address bar.</string>
+    <string name="p2p_sender_hint_wifi_connected" formatted="false">• Open Receiver App in \'Receiver mode\' \n\n(OR)\n\n• Open WiFi settings and connect to: \nSSID: %s\nPassword: %s\n And then enter below URL into browser\'s address bar\n%s</string>
     <string name="p2p_sender_subtitle">Hotspot Initialised!!</string>
 
     <string name="p2p_sender_service_notification_header">ShareThem Wifi Hotspot Enabled</string>

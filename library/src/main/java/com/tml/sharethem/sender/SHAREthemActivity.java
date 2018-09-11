@@ -15,12 +15,16 @@
  */
 package com.tml.sharethem.sender;
 
+import android.Manifest;
+import android.annotation.TargetApi;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
@@ -29,6 +33,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -46,12 +52,13 @@ import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.tml.sharethem.R;
 import com.tml.sharethem.utils.DividerItemDecoration;
+import com.tml.sharethem.utils.HotspotControl;
 import com.tml.sharethem.utils.RecyclerViewArrayAdapter;
 import com.tml.sharethem.utils.Utils;
-import com.tml.sharethem.utils.HotspotControl;
 import com.tml.sharethem.utils.WifiUtils;
 
 import org.json.JSONArray;
@@ -63,7 +70,9 @@ import java.util.List;
 
 import static com.tml.sharethem.sender.SHAREthemActivity.ShareUIHandler.LIST_API_CLIENTS;
 import static com.tml.sharethem.sender.SHAREthemActivity.ShareUIHandler.UPDATE_AP_STATUS;
+import static com.tml.sharethem.utils.Utils.DEFAULT_PORT_OREO;
 import static com.tml.sharethem.utils.Utils.getRandomColor;
+import static com.tml.sharethem.utils.Utils.isOreoOrAbove;
 
 /**
  * Controls Hotspot service to share files passed through intent.<br>
@@ -100,6 +109,8 @@ public class SHAREthemActivity extends AppCompatActivity {
     private boolean shouldAutoConnect = true;
 
     private String[] m_sharedFilePaths = null;
+
+    private static final int PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 100;
 
     //region: Activity Methods
     @Override
@@ -139,36 +150,39 @@ public class SHAREthemActivity extends AppCompatActivity {
         if (null == m_sharedFilePaths)
             m_sharedFilePaths = Utils.toStringArray(prefs.getString(PREFERENCES_KEY_SHARED_FILE_PATHS, null));
         else
-            prefs.edit().putString(PREFERENCES_KEY_SHARED_FILE_PATHS, new JSONArray(Arrays.asList(m_sharedFilePaths)).toString()).commit();
+            prefs.edit().putString(PREFERENCES_KEY_SHARED_FILE_PATHS, new JSONArray(Arrays.asList(m_sharedFilePaths)).toString()).apply();
         m_receiversListAdapter = new ReceiversListingAdapter(new ArrayList<HotspotControl.WifiScanResult>(), m_sharedFilePaths);
         m_receiversList.setAdapter(m_receiversListAdapter);
         m_sender_ap_switch_listener = new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                shouldAutoConnect = isChecked;
                 if (isChecked) {
-                    //If target version is MM and beyond, you need to check System Write permissions to proceed.
-                    if (Build.VERSION.SDK_INT >= 23 &&
-                            // if targetSdkVersion >= 23
-                            //     ShareActivity has to check for System Write permissions to proceed
-                            Utils.getTargetSDKVersion(getApplicationContext()) >= 23 && !Settings.System.canWrite(SHAREthemActivity.this)) {
+                    if (!isOreoOrAbove()) {
+                        //If target version is MM and beyond, you need to check System Write permissions to proceed.
+                        if (Build.VERSION.SDK_INT >= 23 &&
+                                // if targetSdkVersion >= 23
+                                //     ShareActivity has to check for System Write permissions to proceed
+                                Utils.getTargetSDKVersion(getApplicationContext()) >= 23 && !Settings.System.canWrite(SHAREthemActivity.this)) {
+                            changeApControlCheckedStatus(false);
+                            showMessageDialogWithListner(getString(R.string.p2p_sender_system_settings_permission_prompt), new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
+                                    intent.setData(Uri.parse("package:" + getPackageName()));
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    startActivityForResult(intent, REQUEST_WRITE_SETTINGS);
+                                }
+                            }, false, true);
+                            return;
+                        } else if (!getSharedPreferences(getPackageName(), Context.MODE_PRIVATE).getBoolean(PREFERENCES_KEY_DATA_WARNING_SKIP, false) && Utils.isMobileDataEnabled(getApplicationContext())) {
+                            changeApControlCheckedStatus(false);
+                            showDataWarningDialog();
+                            return;
+                        }
+                    } else if (!checkLocationPermission()) {
                         changeApControlCheckedStatus(false);
-                        showMessageDialogWithListner(getString(R.string.p2p_sender_system_settings_permission_prompt), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
-                                intent.setData(Uri.parse("package:" + getPackageName()));
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivityForResult(intent, REQUEST_WRITE_SETTINGS);
-                            }
-                        }, false, true);
-                        return;
-                    } else if (!getSharedPreferences(getPackageName(), Context.MODE_PRIVATE).getBoolean(PREFERENCES_KEY_DATA_WARNING_SKIP, false) && Utils.isMobileDataEnabled(getApplicationContext())) {
-                        changeApControlCheckedStatus(false);
-                        showDataWarningDialog();
                         return;
                     }
-                    m_sender_wifi_info.setText(getString(R.string.p2p_sender_hint_connecting));
                     enableAp();
                 } else {
                     changeApControlCheckedStatus(true);
@@ -217,7 +231,9 @@ public class SHAREthemActivity extends AppCompatActivity {
             resetSenderUi(false);
         }
         //switch on sender mode if not already
-        else if (shouldAutoConnect) m_apControlSwitch.setChecked(true);
+        else if (shouldAutoConnect) {
+            m_apControlSwitch.setChecked(true);
+        }
     }
 
     @Override
@@ -237,6 +253,41 @@ public class SHAREthemActivity extends AppCompatActivity {
         if (null != m_uiUpdateHandler)
             m_uiUpdateHandler.removeCallbacksAndMessages(null);
         m_uiUpdateHandler = null;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    enableAp();
+                } else {
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                        showMessageDialogWithListner(getString(R.string.p2p_receiver_gps_permission_warning), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                checkLocationPermission();
+                            }
+                        }, true, true);
+                    } else {
+                        showMessageDialogWithListner(getString(R.string.p2p_receiver_gps_no_permission_prompt), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                try {
+                                    Intent intent = new Intent();
+                                    intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                    Uri uri = Uri.fromParts("package", getPackageName(), null);
+                                    intent.setData(uri);
+                                    startActivity(intent);
+                                } catch (ActivityNotFoundException anf) {
+                                    Toast.makeText(getApplicationContext(), "Settings activity not found", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }, true, true);
+                    }
+                }
+        }
     }
     //endregion: Activity Methods
 
@@ -264,6 +315,19 @@ public class SHAREthemActivity extends AppCompatActivity {
         builder.show();
     }
 
+    @TargetApi(23)
+    private boolean checkLocationPermission() {
+        if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                    PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION
+            );
+            return false;
+        }
+        return true;
+    }
+
     public void showDataWarningDialog() {
         if (isFinishing())
             return;
@@ -283,7 +347,6 @@ public class SHAREthemActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         changeApControlCheckedStatus(true);
-                        m_sender_wifi_info.setText(getString(R.string.p2p_sender_hint_connecting));
                         enableAp();
                     }
                 });
@@ -293,7 +356,6 @@ public class SHAREthemActivity extends AppCompatActivity {
                 SharedPreferences prefs = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
                 prefs.edit().putBoolean(PREFERENCES_KEY_DATA_WARNING_SKIP, true).apply();
                 changeApControlCheckedStatus(true);
-                m_sender_wifi_info.setText(getString(R.string.p2p_sender_hint_connecting));
                 enableAp();
             }
         });
@@ -319,6 +381,7 @@ public class SHAREthemActivity extends AppCompatActivity {
 
     //region: Hotspot Control
     private void enableAp() {
+        m_sender_wifi_info.setText(getString(R.string.p2p_sender_hint_connecting));
         startP2pSenderWatchService();
         refreshApData();
         m_receivers_list_layout.setVisibility(View.VISIBLE);
@@ -333,13 +396,13 @@ public class SHAREthemActivity extends AppCompatActivity {
     }
 
     /**
-     * Starts {@link SHAREthemService} with intent action {@link SHAREthemService#WIFI_AP_ACTION_START} to enableShareThemHotspot Hotspot and start {@link SHAREthemServer}.
+     * Starts {@link SHAREthemService} with intent action {@link SHAREthemService#WIFI_AP_ACTION_START} to turnOnPreOreoHotspot Hotspot and start {@link SHAREthemServer}.
      */
     private void startP2pSenderWatchService() {
         Intent p2pServiceIntent = new Intent(getApplicationContext(), SHAREthemService.class);
         p2pServiceIntent.putExtra(SHAREthemService.EXTRA_FILE_PATHS, m_sharedFilePaths);
         if (null != getIntent()) {
-            p2pServiceIntent.putExtra(SHAREthemService.EXTRA_PORT, getIntent().getIntExtra(SHAREthemService.EXTRA_PORT, 0));
+            p2pServiceIntent.putExtra(SHAREthemService.EXTRA_PORT, isOreoOrAbove() ? DEFAULT_PORT_OREO : getIntent().getIntExtra(SHAREthemService.EXTRA_PORT, 0));
             p2pServiceIntent.putExtra(SHAREthemService.EXTRA_SENDER_NAME, getIntent().getStringExtra(SHAREthemService.EXTRA_SENDER_NAME));
         }
         p2pServiceIntent.setAction(SHAREthemService.WIFI_AP_ACTION_START);
@@ -384,7 +447,7 @@ public class SHAREthemActivity extends AppCompatActivity {
             else
                 ip = ip.replace("/", "");
             m_toolbar.setSubtitle(getString(R.string.p2p_sender_subtitle));
-            m_sender_wifi_info.setText(getString(R.string.p2p_sender_hint_wifi_connected, config.SSID, "http://" + ip + ":" + hotspotControl.getShareServerListeningPort()));
+            m_sender_wifi_info.setText(getString(R.string.p2p_sender_hint_wifi_connected, config.SSID, config.preSharedKey, "http://" + ip + ":" + hotspotControl.getShareServerListeningPort()));
             if (m_showShareList.getVisibility() == View.GONE) {
                 m_showShareList.append(String.valueOf(m_sharedFilePaths.length));
                 m_showShareList.setVisibility(View.VISIBLE);
@@ -468,6 +531,7 @@ public class SHAREthemActivity extends AppCompatActivity {
         m_apControlSwitch.setOnCheckedChangeListener(null);
         m_apControlSwitch.setChecked(checked);
         m_apControlSwitch.setOnCheckedChangeListener(m_sender_ap_switch_listener);
+        shouldAutoConnect = checked;
     }
     //endregion: Hotspot Control
 

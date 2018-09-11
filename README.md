@@ -26,14 +26,17 @@ Library also supports App (Android) to Web/Mobile Browser transfers if Receiver 
 
 ### Usage
 
+## UPDATE
+Added Android-8, OREO support with default Android Hotspot functionality which comes with password protected Hotspot and so Receiver has to explicitly key-in password, inline with SHAREit functionality.
+
 ## SHARE mode
 To start SHARE mode, you need to pass an array of strings holding references of files you want to share along with port(optional) and sender name using an Intent to start SHAREthemActivity
 
 ```
 Intent intent = new Intent(getApplicationContext(), SHAREthemActivity.class);
 intent.putExtra(ShareService.EXTRA_FILE_PATHS, new String[]{[path to file1], [path to file2]}); // mandatory
-intent.putExtra(ShareService.EXTRA_PORT, 52287); //optional but preferred
-intent.putExtra(ShareService.EXTRA_SENDER_NAME, "Sri"); //optional
+intent.putExtra(ShareService.EXTRA_PORT, 52287); //optional but preferred. PORT value is hardcoded for Oreo and above since it's not possible to set SSID with which port info can be extracted on Receiver side.
+intent.putExtra(ShareService.EXTRA_SENDER_NAME, "Sri"); //optional. Sender name can't be relayed to receiver for Oreo & above
 startActivity(intent);
 ```
 

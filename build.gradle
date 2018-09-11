@@ -5,7 +5,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.2'
+        classpath 'com.android.tools.build:gradle:3.0.0'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -17,7 +17,7 @@ allprojects {
         jcenter()
     }
     project.ext {
-        compileSdkVersion = 25
+        compileSdkVersion = 27
 
         // increasing targetSdkVersion version might impact behaviour of this library
         // if targetSdkVersion >= 23
@@ -28,7 +28,7 @@ allprojects {
         //      If an application's target SDK version is LOLLIPOP or newer, network communication may not use Wi-Fi even if Wi-Fi is connected;
         //  this might impact when Receiver connectivity to SHAREthem hotspot, library checks for this scenario and prompts user to disable data
         //      For more info: https://developer.android.com/reference/android/net/wifi/WifiManager.html#enableNetwork(int, boolean)
-        targetSdkVersion = 20
+        targetSdkVersion = 27
 
         buildToolsVersion = '25.0.2'
         supportLibVersion = '25.1.0'

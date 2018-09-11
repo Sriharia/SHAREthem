@@ -3,6 +3,9 @@ package com.tml.sharethem.utils;
 import android.content.Context;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.os.Build;
+import android.os.Handler;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import com.tml.sharethem.sender.SHAREthemActivity;
@@ -23,6 +26,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
+
+import static com.tml.sharethem.utils.Utils.isOreoOrAbove;
 
 public class HotspotControl {
 
@@ -46,6 +51,8 @@ public class HotspotControl {
 
     private WifiManager wm;
     private String deviceName;
+
+    private WifiManager.LocalOnlyHotspotReservation mReservation;
 
     private static HotspotControl instance = null;
     static final String DEFAULT_DEVICE_NAME = "Unknown";
@@ -85,6 +92,9 @@ public class HotspotControl {
     }
 
     public boolean isEnabled() {
+        if (isOreoOrAbove()) {
+            return null != mReservation && mReservation.getWifiConfiguration() != null;
+        }
         Object result = invokeSilently(isWifiApEnabled, wm);
         if (result == null) {
             return false;
@@ -102,13 +112,16 @@ public class HotspotControl {
     }
 
     public static boolean isSupported() {
-        return (getWifiApState != null
+        return isOreoOrAbove() || (getWifiApState != null
                 && isWifiApEnabled != null
                 && setWifiApEnabled != null
                 && getWifiApConfiguration != null);
     }
 
     public WifiConfiguration getConfiguration() {
+        if (isOreoOrAbove()) {
+            return mReservation.getWifiConfiguration();
+        }
         Object result = invokeSilently(getWifiApConfiguration, wm);
         if (result == null) {
             return null;
@@ -132,6 +145,34 @@ public class HotspotControl {
         return (Boolean) result;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void turnOnOreoHotspot(int port) {
+        m_shareServerListeningPort = port;
+        wm.startLocalOnlyHotspot(new WifiManager.LocalOnlyHotspotCallback() {
+
+            @Override
+            public void onStarted(WifiManager.LocalOnlyHotspotReservation reservation) {
+                super.onStarted(reservation);
+                Log.d(TAG, "Wifi Hotspot is on now");
+                mReservation = reservation;
+            }
+
+            @Override
+            public void onStopped() {
+                super.onStopped();
+                Log.d(TAG, "onStopped: ");
+                mReservation = null;
+            }
+
+            @Override
+            public void onFailed(int reason) {
+                super.onFailed(reason);
+                Log.d(TAG, "onFailed: ");
+                mReservation = null;
+            }
+        }, new Handler());
+    }
+
     /**
      * Creates a new OPEN {@link WifiConfiguration} and invokes {@link WifiManager}'s method via <code>Reflection</code> to enable Hotspot
      *
@@ -139,7 +180,7 @@ public class HotspotControl {
      * @param port Port number assigned to {@link com.tml.sharethem.sender.SHAREthemServer}, not used anywhere in {@link HotspotControl} but helps {@link SHAREthemActivity} to display port info
      * @return true if {@link WifiManager}'s method is successfully called
      */
-    public boolean enableShareThemHotspot(String name, int port) {
+    public boolean turnOnPreOreoHotspot(String name, int port) {
         wm.setWifiEnabled(false);
 
         m_shareServerListeningPort = port;
@@ -157,22 +198,31 @@ public class HotspotControl {
         return setHotspotEnabled(wifiConf, true);
     }
 
-    /**
-     * Calls {@link WifiManager}'s method via reflection to enabled Hotspot with existing configuration
-     *
-     * @return
-     */
-    public boolean enable() {
-        wm.setWifiEnabled(false);
-        return setHotspotEnabled(getConfiguration(), true);
-    }
+//    /**
+//     * Calls {@link WifiManager}'s method via reflection to enabled Hotspot with existing configuration
+//     *
+//     * @return
+//     */
+//    public boolean enable() {
+//        wm.setWifiEnabled(false);
+//        return setHotspotEnabled(getConfiguration(), true);
+//    }
 
     public boolean disable() {
-        //restore original hotspot config if available
-        if (null != m_original_config_backup)
-            setHotspotConfig(m_original_config_backup);
-        m_shareServerListeningPort = 0;
-        return setHotspotEnabled(m_original_config_backup, false);
+        if (isOreoOrAbove()) {
+            if (mReservation != null) {
+                mReservation.close();
+                mReservation = null;
+                return true;
+            }
+            return false;
+        } else {
+            //restore original hotspot config if available
+            if (null != m_original_config_backup)
+                setHotspotConfig(m_original_config_backup);
+            m_shareServerListeningPort = 0;
+            return setHotspotEnabled(m_original_config_backup, false);
+        }
     }
 
     public int getShareServerListeningPort() {

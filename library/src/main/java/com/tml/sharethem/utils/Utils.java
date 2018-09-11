@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.Build;
 import android.provider.Settings;
 
 import com.tml.sharethem.sender.SHAREthemService;
@@ -19,6 +20,8 @@ import java.util.Random;
  */
 
 public class Utils {
+
+    public static final int DEFAULT_PORT_OREO = 52287;
 
     public static boolean isShareServiceRunning(Context ctx) {
         ActivityManager manager = (ActivityManager) ctx
@@ -131,5 +134,9 @@ public class Utils {
             macAddress[i] = Integer.decode("0x" + mac[i]).byteValue();
         }
         return macAddress;
+    }
+
+    public static boolean isOreoOrAbove() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
     }
 }

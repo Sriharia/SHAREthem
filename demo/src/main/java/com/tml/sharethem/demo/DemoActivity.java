@@ -23,6 +23,8 @@ import com.tml.sharethem.utils.HotspotControl;
 
 import java.io.File;
 
+import static com.tml.sharethem.utils.Utils.DEFAULT_PORT_OREO;
+
 public class DemoActivity extends AppCompatActivity {
 
     FilePickerDialog dialog;
@@ -60,7 +62,13 @@ public class DemoActivity extends AppCompatActivity {
                 }
                 Intent intent = new Intent(getApplicationContext(), SHAREthemActivity.class);
                 intent.putExtra(SHAREthemService.EXTRA_FILE_PATHS, files);
-                intent.putExtra(SHAREthemService.EXTRA_PORT, 52287);
+                /*
+                 * PORT value is hardcoded for Oreo & above since it's not possible to set SSID with which port info can be extracted on Receiver side.
+                 */
+                intent.putExtra(SHAREthemService.EXTRA_PORT, DEFAULT_PORT_OREO);
+                /*
+                 * Sender name can't be relayed to receiver for Oreo & above
+                 */
                 intent.putExtra(SHAREthemService.EXTRA_SENDER_NAME, "Sri");
                 startActivity(intent);
             }
