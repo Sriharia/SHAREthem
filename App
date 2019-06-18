@@ -1,0 +1,41 @@
+package com.tml.sharethem.utils;
+
+import android.app.Application;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.os.Build;
+import android.util.Log;
+import android.widget.Toast;
+
+import static com.tml.sharethem.sender.SHAREthemActivity.TAG;
+
+/**
+ * Created by Nazi on 6/18/2019.
+ */
+
+public class App extends Application {
+    public static final String CHANNEL_1_ID="channel1";
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        createNotifcationChannel();
+    }
+
+    private void createNotifcationChannel() {
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
+            NotificationChannel channel1 = new NotificationChannel(CHANNEL_1_ID,"CHANNEL 1 ", NotificationManager.IMPORTANCE_HIGH);
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            channel1.setDescription("This is Channel 1");
+            if(manager!=null) {
+                manager.createNotificationChannel(channel1);
+            }
+            else {
+                Toast.makeText(this, "Notification Manager is null", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "createNotifcationChannel: null");
+            }
+        }
+
+
+    }
+}
