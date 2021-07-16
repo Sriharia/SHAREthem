@@ -9,7 +9,9 @@ Library also supports App (Android) to Web/Mobile Browser transfers if Receiver 
  
  Download the Working version from Play Store
 
+
 [![PlayStore](screens/google-play-badge.png)](https://play.google.com/store/apps/details?id=com.tml.sharethem.demo) 
+
 
 
 ### Developed by
